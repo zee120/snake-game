@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>snake</title>
+    <style>
+        body{
+            display:flex;
+            flex-direction: column;
+            align-items:center;
+            padding: 0;
+            margin: 0;
+            height: 10vh;
+            background: rgb(221, 114, 114);
+        }
+        h1{
+            margin: 0px;
+            margin-bottom: 10px;
+            font-family: Comic Sans MS;
+            font-size: 3em;
+            color:lightgray;
+        }
+        button{
+            margin: 25px;
+            margin-bottom: 100px;
+            font-family: Comic Sans MS;
+            font-size: 1em;
+            color:rgb(235, 5, 5);
+        }
+        p{
+            margin: 0.001px;
+            margin-bottom: 10px;
+            font-family: Marker Felt;
+            font-size: 1.5em;
+            color:rgb(255, 255, 255);
+        }
+        canvas{
+            box-shadow: black 20px 15px 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake</h1>
+    <canvas id ="canvas" width="400" height="400"></canvas>
+    <button onclick="restartGame()">Restart</button>
+    <p id="feedback"> Try to avoid the <span style="color: red; background-color: yellow">Red Box</span></p>
+    <script src="snake.JS"></script>
+</body>
+</html>
