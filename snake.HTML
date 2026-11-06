@@ -1,51 +1,82 @@
+<!-- Tell the browser this document uses modern HTML5. -->
 <!DOCTYPE html>
+<!-- Start the document and identify English as its language for assistive tools. -->
 <html lang="en">
+<!-- Group page metadata, the browser-tab title, and the stylesheet reference. -->
 <head>
+    <!-- Use UTF-8 so arrows and other special characters display correctly. -->
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Use the device width and normal initial zoom for the responsive layout. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>snake</title>
-    <style>
-        body{
-            display:flex;
-            flex-direction: column;
-            align-items:center;
-            padding: 0;
-            margin: 0;
-            height: 10vh;
-            background: rgb(221, 114, 114);
-        }
-        h1{
-            margin: 0px;
-            margin-bottom: 10px;
-            font-family: Comic Sans MS;
-            font-size: 3em;
-            color:lightgray;
-        }
-        button{
-            margin: 25px;
-            margin-bottom: 100px;
-            font-family: Comic Sans MS;
-            font-size: 1em;
-            color:rgb(235, 5, 5);
-        }
-        p{
-            margin: 0.001px;
-            margin-bottom: 10px;
-            font-family: Marker Felt;
-            font-size: 1.5em;
-            color:rgb(255, 255, 255);
-        }
-        canvas{
-            box-shadow: black 20px 15px 50px;
-        }
-    </style>
+    <!-- Suggest a dark browser-toolbar color on browsers that support it. -->
+    <meta name="theme-color" content="#0b1017">
+    <!-- Set the text displayed in the browser tab. -->
+    <title>Snake — The Arcade Edition</title>
+    <!-- Load the arcade presentation from the separate stylesheet in this folder. -->
+    <link rel="stylesheet" href="snake.css">
 </head>
-<body>
-    <h1>Snake</h1>
-    <canvas id ="canvas" width="400" height="400"></canvas>
-    <button onclick="restartGame()">Restart</button>
-    <p id="feedback"> Try to avoid the <span style="color: red; background-color: yellow">Red Box</span></p>
+<!-- Start visible content. Prevent arrow-key page scrolling while allowing the existing game key listener to receive events. -->
+<body onkeydown="if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) event.preventDefault()">
+    <!-- Display the caption above the cabinet; the span colors the first phrase and nonbreaking spaces separate the label. -->
+    <p class="room-label"><span>THE CLASSICS NEVER GET OLD</span> &nbsp; / &nbsp; EST. CPSC 1045</p>
+    <!-- Mark the primary content as an arcade cabinet with a descriptive accessible label. -->
+    <main class="cabinet" aria-label="Snake arcade cabinet">
+        <!-- Group the illuminated sign at the top of the cabinet. -->
+        <header class="marquee">
+            <!-- Display the small slogan above the game title. -->
+            <p class="eyebrow">ONE MORE GAME</p>
+            <!-- Display the page’s primary heading, styled as the large arcade title. -->
+            <h1>SNAKE</h1>
+            <!-- Show the edition and single-player label beneath the title. -->
+            <p class="edition">THE ARCADE EDITION · 1 PLAYER</p>
+        </header>
+        <!-- Group the game screen and feedback with an accessible section name. -->
+        <section class="screen-housing" aria-label="Game screen">
+            <!-- Show the decorative screen caption and power indicator; CSS draws the green light before POWER. -->
+            <div class="screen-top"><span>HIGH VOLTAGE · HIGH SCORES</span><span class="power">POWER</span></div>
+            <!-- Wrap the canvas in the bezel and scanline effects. -->
+            <div class="screen">
+                <!-- Keep the canvas ID used by snake.JS and its original 400-by-400 drawing size. The accessible label explains play; fallback text appears without canvas support. -->
+                <canvas id="canvas" width="400" height="400" aria-label="Snake game board. Use the arrow keys to move, collect apples, and avoid the red bomb and your own body.">Your browser needs canvas support to play Snake.</canvas>
+            </div>
+            <!-- Keep the feedback ID used by snake.JS. The status role announces updates politely; the danger span highlights the initial warning. -->
+            <p id="feedback" class="feedback" role="status">Press an arrow key to start. Avoid the <span class="danger">red box.</span></p>
+        </section>
+        <!-- Group the visible control guide and functional restart button. -->
+        <section class="control-deck" aria-label="Game controls">
+            <!-- Keep a control and its caption together as a centered group. -->
+            <div class="control">
+                <!-- Show keyboard key labels in an arrow layout. These kbd elements are instructions rather than touch buttons. -->
+                <div class="keys" aria-label="Use your keyboard arrow keys"><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div>
+                <!-- Print a short instruction beneath the control. -->
+                <span class="control-label">KEYBOARD TO MOVE</span>
+            </div>
+            <!-- Add a decorative slogan with a line break and emphasized last word; hide this decorative text from assistive readers. -->
+            <div class="deck-mark" aria-hidden="true">EAT. GROW.<br><strong>REPEAT.</strong></div>
+            <!-- Keep a control and its caption together as a centered group. -->
+            <div class="control">
+                <!-- Call the existing restartGame function when clicked. The button type avoids form submission and the accessible label describes its action. -->
+                <button type="button" onclick="restartGame()" aria-label="Restart game">RESTART</button>
+                <!-- Print a short instruction beneath the control. -->
+                <span class="control-label">FRESH START</span>
+            </div>
+        </section>
+        <!-- Group the printed playing instructions and machine labels. -->
+        <section class="lower-panel" aria-label="Playing instructions">
+            <!-- Create the bordered instruction plate. -->
+            <div class="instructions">
+                <!-- Introduce the playing instructions with a second-level heading. -->
+                <h2>HOW TO PLAY</h2>
+                <!-- Explain the rules; the br element puts the wrapping and tail warning on another line. -->
+                <p>Collect apples. Dodge the red bomb.<br>Edges wrap around. Your own tail doesn't forgive.</p>
+            </div>
+            <!-- Show the course credit on the left and the free-play label on the right. -->
+            <div class="machine-id"><span>LANGARA · CPSC 1045</span><span>FREE PLAY</span></div>
+        </section>
+    </main>
+    <!-- Show the closing slogan and technologies on separate lines beneath the cabinet. -->
+    <footer>BUILT FOR THE LOVE OF THE GAME.<br>HTML / CSS / JAVASCRIPT</footer>
+    <!-- Load the unchanged game script after the canvas and feedback elements exist. -->
     <script src="snake.JS"></script>
 </body>
 </html>

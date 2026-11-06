@@ -1,0 +1,669 @@
+/* Arcade presentation for snake.HTML. Game drawing and logic remain in snake.JS. */
+
+/* Define shared colors and the page’s dark appearance. */
+:root {
+    /* Tell the browser to use dark native controls and surfaces. */
+    color-scheme: dark;
+    /* Store the blue accent color so other rules can reuse it. */
+    --blue: #35baff;
+    /* Store the warm cream text color for reuse throughout the page. */
+    --cream: #fff0c6;
+}
+
+/* Apply the same box sizing to every element. */
+* {
+    /* Include padding and borders in each element’s specified dimensions. */
+    box-sizing: border-box;
+}
+
+/* Style the page around the cabinet. */
+body {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0;
+    /* Reserve a minimum height while allowing taller content to fit. */
+    min-height: 100vh;
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 32px 20px 24px;
+    /* Set the foreground text color. */
+    color: var(--cream);
+    /* Choose the typeface, with a generic fallback if the named font is unavailable. */
+    font-family: 'Courier New', monospace;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: radial-gradient(ellipse at 50% 35%, #173044 0, #0c1621 40%, #070b11 80%);
+}
+
+/* Draw a faint decorative grid behind the cabinet. */
+body::before {
+    /* Create the empty decorative pseudo-element without adding HTML content. */
+    content: '';
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: fixed;
+    /* Set all four offsets to cover the containing area. */
+    inset: 0;
+    /* Let mouse and touch input pass through this decorative overlay. */
+    pointer-events: none;
+    /* Make the whole decoration partially transparent. */
+    opacity: .14;
+    /* Layer horizontal and vertical gradients to draw the room’s grid. */
+    background-image: linear-gradient(#517085 1px, transparent 1px), linear-gradient(90deg, #517085 1px, transparent 1px);
+    /* Set the width and height of each repeating grid tile. */
+    background-size: 64px 64px;
+    /* Fade the grid from hidden at the top to visible toward the bottom. */
+    mask-image: linear-gradient(transparent 45%, black);
+}
+
+/* Style .room-label, footer; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.room-label, footer {
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: relative;
+    /* Center the text inside this element. */
+    text-align: center;
+    /* Set the size of the text. */
+    font-size: 10px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 3px;
+    /* Set the foreground text color. */
+    color: #90a6b8;
+}
+
+/* Style .room-label; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.room-label {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0 0 24px;
+}
+
+/* Style .room-label span; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.room-label span {
+    /* Set the foreground text color. */
+    color: var(--blue);
+}
+
+/* Build the arcade cabinet’s outer shell. */
+.cabinet {
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: relative;
+    /* Set the element’s width; min() caps the cabinet while allowing it to shrink. */
+    width: min(100%, 564px);
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: auto;
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 12px 17px 0;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 2px solid #495560;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 14px 14px 5px 5px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: linear-gradient(90deg, #111820, #29323c 3%, #10151c 5%, #161e27 95%, #34424e 97%, #0b1016);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 28px 65px #000b, -5px 0 0 #080c11, 5px 0 0 #080c11, inset 3px 0 #4aaee766, inset -3px 0 #4aaee766;
+}
+
+/* Style the illuminated title panel. */
+.marquee {
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: relative;
+    /* Clip anything extending past this element’s edges and rounded corners. */
+    overflow: hidden;
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 15px 12px 13px;
+    /* Center the text inside this element. */
+    text-align: center;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 4px solid #080e17;
+    /* Draw an extra ring outside the border without changing the layout size. */
+    outline: 1px solid #54798d;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 3px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: repeating-linear-gradient(125deg, transparent 0 35px, #1683c122 36px 38px), radial-gradient(ellipse, #135378, #071426 80%);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 0 24px #158ee52b, inset 0 0 20px #2494eb40;
+}
+
+/* Style .marquee::before, .marquee::after; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.marquee::before, .marquee::after {
+    /* Create the empty decorative pseudo-element without adding HTML content. */
+    content: '';
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: absolute;
+    /* Set the element’s width; min() caps the cabinet while allowing it to shrink. */
+    width: 130px;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: 14px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: #e9443f;
+    /* Position this decoration relative to the bottom of its containing block. */
+    bottom: 27px;
+    /* Rotate a marquee stripe or shift the pressed button without moving surrounding content. */
+    transform: rotate(-35deg);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 16px #ffb93d, 0 22px #ffe19c;
+}
+
+/* Style .marquee::before; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.marquee::before {
+    /* Position this decoration relative to the left of its containing block. */
+    left: -65px;
+}
+
+/* Style .marquee::after; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.marquee::after {
+    /* Position this decoration relative to the right of its containing block. */
+    right: -65px;
+    /* Rotate a marquee stripe or shift the pressed button without moving surrounding content. */
+    transform: rotate(35deg);
+}
+
+/* Style .eyebrow; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.eyebrow {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0;
+    /* Set the size of the text. */
+    font-size: 9px;
+    /* Make the lettering bold. */
+    font-weight: bold;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 5px;
+    /* Set the foreground text color. */
+    color: #8ad9ff;
+}
+
+/* Style h1; class selectors target matching HTML classes and pseudo-elements add decoration. */
+h1 {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0;
+    /* Set the type size and font family in one shorthand, including style, weight, or line spacing when specified. */
+    font: italic 900 clamp(48px, 12vw, 76px)/1.05 Impact, 'Arial Black', sans-serif;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 8px;
+    /* Set the foreground text color. */
+    color: #fff2c5;
+    /* Layer colored text shadows to give the title a raised, glowing arcade-sign appearance. */
+    text-shadow: 2px 3px #e44e3b, 4px 5px #631c25, 0 0 25px #ffc85a66;
+}
+
+/* Style .marquee .edition; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.marquee .edition {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: inline-block;
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 9px 0 0;
+    /* Set the size of the text. */
+    font-size: 9px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 4px;
+    /* Set the foreground text color. */
+    color: #fff2c5;
+    /* Draw the top divider or highlight. */
+    border-top: 1px solid #70c8f577;
+    /* Add space above the content inside this element. */
+    padding-top: 7px;
+}
+
+/* Style .screen-housing; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.screen-housing {
+    /* Add outside spacing above the element. */
+    margin-top: 15px;
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 13px 28px 18px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: linear-gradient(120deg, #090d12, #1c2530 50%, #090d12);
+    /* Draw the top divider or highlight. */
+    border-top: 2px solid #343e47;
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: inset 0 8px 16px #0008;
+}
+
+/* Style .screen-top; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.screen-top {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: flex;
+    /* Distribute or center items along the layout’s main axis. */
+    justify-content: space-between;
+    /* Set the space between flex or grid items. */
+    gap: 10px;
+    /* Add outside spacing below the element. */
+    margin-bottom: 11px;
+    /* Set the size of the text. */
+    font-size: 8px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 2px;
+    /* Set the foreground text color. */
+    color: #91a3ae;
+}
+
+/* Style .power; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.power {
+    /* Set the foreground text color. */
+    color: #93d5b0;
+}
+
+/* Style .power::before; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.power::before {
+    /* Create the empty decorative pseudo-element without adding HTML content. */
+    content: '';
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: inline-block;
+    /* Set the element’s width; min() caps the cabinet while allowing it to shrink. */
+    width: 5px;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: 5px;
+    /* Separate the power light from its label. */
+    margin-right: 7px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: #80efac;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 50%;
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 0 7px #80efac;
+}
+
+/* Frame the playable canvas with a recessed bezel. */
+.screen {
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: relative;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 9px solid #05080b;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 17px;
+    /* Clip anything extending past this element’s edges and rounded corners. */
+    overflow: hidden;
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 0 0 2px #37434b, 0 0 0 5px #111820, 0 6px 18px #000, 0 0 24px #53adba12;
+}
+
+/* Scale the visible board while retaining the original game coordinates. */
+canvas {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: block;
+    /* Set the element’s width; min() caps the cabinet while allowing it to shrink. */
+    width: 100%;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: auto;
+    /* Keep the displayed canvas square without changing its drawing-buffer dimensions. */
+    aspect-ratio: 1;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: gray;
+}
+
+/* Overlay subtle scanlines and edge shading without blocking interaction. */
+.screen::after {
+    /* Create the empty decorative pseudo-element without adding HTML content. */
+    content: '';
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: absolute;
+    /* Set all four offsets to cover the containing area. */
+    inset: 0;
+    /* Let mouse and touch input pass through this decorative overlay. */
+    pointer-events: none;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 7px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: repeating-linear-gradient(transparent 0 3px, #00000010 3px 4px);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: inset 0 0 22px #0004;
+}
+
+/* Keep space below the screen for JavaScript’s gameplay messages. */
+.feedback {
+    /* Reserve a minimum height while allowing taller content to fit. */
+    min-height: 48px;
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 15px 0 0;
+    /* Add space above the content inside this element. */
+    padding-top: 6px;
+    /* Center the text inside this element. */
+    text-align: center;
+    /* Set the foreground text color. */
+    color: #b2c9cd;
+    /* Set the size of the text. */
+    font-size: 11px;
+    /* Set line spacing as a multiple of the text size. */
+    line-height: 1.6;
+}
+
+/* Style .danger; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.danger {
+    /* Set the foreground text color. */
+    color: #ff8271;
+}
+
+/* Arrange the keyboard guide and restart button on the control panel. */
+.control-deck {
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: relative;
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: flex;
+    /* Distribute or center items along the layout’s main axis. */
+    justify-content: space-around;
+    /* Align the control groups vertically in the flex row. */
+    align-items: center;
+    /* Set the space between flex or grid items. */
+    gap: 16px;
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 20px 20px 19px;
+    /* Draw the top divider or highlight. */
+    border-top: 3px solid #53778b;
+    /* Draw a thick lower edge to give the control deck depth. */
+    border-bottom: 7px solid #070b10;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: repeating-linear-gradient(120deg, transparent 0 28px, #55b2d509 29px 30px), linear-gradient(#263643, #101b24);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: inset 0 2px #71b8d533;
+}
+
+/* Style .control-deck::after; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.control-deck::after {
+    /* Create the empty decorative pseudo-element without adding HTML content. */
+    content: '';
+    /* Choose how this element is positioned; relative also anchors absolute decorations. */
+    position: absolute;
+    /* Position this decoration relative to the bottom of its containing block. */
+    bottom: 0;
+    /* Position this decoration relative to the left of its containing block. */
+    left: 0;
+    /* Position this decoration relative to the right of its containing block. */
+    right: 0;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: 4px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: linear-gradient(90deg, #329adb 0 34%, #ee5145 34% 67%, #f6be4b 67%);
+}
+
+/* Style .control; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.control {
+    /* Center the text inside this element. */
+    text-align: center;
+}
+
+/* Style .control-label; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.control-label {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: block;
+    /* Add outside spacing above the element. */
+    margin-top: 11px;
+    /* Set the size of the text. */
+    font-size: 8px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 2px;
+    /* Set the foreground text color. */
+    color: #c6d5dc;
+}
+
+/* Arrange the decorative keyboard guide; these are labels, not clickable controls. */
+.keys {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: grid;
+    /* Create three equal columns for the keyboard-arrow guide. */
+    grid-template-columns: repeat(3, 28px);
+    /* Set the space between flex or grid items. */
+    gap: 4px;
+    /* Distribute or center items along the layout’s main axis. */
+    justify-content: center;
+}
+
+/* Style kbd; class selectors target matching HTML classes and pseudo-elements add decoration. */
+kbd {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: grid;
+    /* Center each key symbol both vertically and horizontally. */
+    place-items: center;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: 24px;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 1px solid #6c8493;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 4px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: linear-gradient(#344857, #1a2a36);
+    /* Set the foreground text color. */
+    color: #ddf3ff;
+    /* Set the type size and font family in one shorthand, including style, weight, or line spacing when specified. */
+    font: 16px monospace;
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 3px #070f16;
+}
+
+/* Style kbd:first-child; class selectors target matching HTML classes and pseudo-elements add decoration. */
+kbd:first-child {
+    /* Place this arrow in a specific column; the left arrow starts the second row. */
+    grid-column: 2;
+}
+
+/* Style kbd:nth-child(2); class selectors target matching HTML classes and pseudo-elements add decoration. */
+kbd:nth-child(2) {
+    /* Place this arrow in a specific column; the left arrow starts the second row. */
+    grid-column: 1;
+}
+
+/* Style the existing restart control as a red arcade button. */
+button {
+    /* Show the hand cursor to indicate that the restart button can be clicked. */
+    cursor: pointer;
+    /* Set the element’s width; min() caps the cabinet while allowing it to shrink. */
+    width: 66px;
+    /* Set the element’s height; auto lets the canvas scale proportionally. */
+    height: 56px;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 5px solid #151c24;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 50%;
+    /* Set the foreground text color. */
+    color: #fff6df;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: radial-gradient(circle at 35% 25%, #ff7862, #d92c31 65%);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 6px 0 #6e151f, 0 8px 0 3px #080e15, inset 0 2px 3px #ffbba6;
+    /* Set the type size and font family in one shorthand, including style, weight, or line spacing when specified. */
+    font: bold 9px 'Courier New', monospace;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 1px;
+    /* Animate button feedback briefly, or disable that animation for reduced-motion preferences. */
+    transition: transform .1s, filter .1s;
+}
+
+/* Highlight the button when hovered. */
+button:hover {
+    /* Brighten the restart button when the pointer hovers over it. */
+    filter: brightness(1.15);
+}
+
+/* Make the pressed button appear to move downward. */
+button:active {
+    /* Rotate a marquee stripe or shift the pressed button without moving surrounding content. */
+    transform: translateY(3px);
+    /* Add outer or inset shadows to create depth, trim, highlights, or glow. */
+    box-shadow: 0 3px 0 #6e151f, 0 5px 0 3px #080e15;
+}
+
+/* Show a clear focus indicator for keyboard users. */
+button:focus-visible {
+    /* Draw an extra ring outside the border without changing the layout size. */
+    outline: 3px solid #8ae1ff;
+    /* Separate the visible keyboard-focus ring from the button. */
+    outline-offset: 7px;
+}
+
+/* Style .deck-mark; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.deck-mark {
+    /* Set the size of the text. */
+    font-size: 10px;
+    /* Set line spacing as a multiple of the text size. */
+    line-height: 1.7;
+    /* Set the foreground text color. */
+    color: #7e99ab;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 2px;
+    /* Center the text inside this element. */
+    text-align: center;
+}
+
+/* Style .deck-mark strong; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.deck-mark strong {
+    /* Set the foreground text color. */
+    color: #eec16d;
+    /* Set the size of the text. */
+    font-size: 13px;
+}
+
+/* Style .lower-panel; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.lower-panel {
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 20px 27px 22px;
+    /* Paint the surface; layered gradients create the cabinet’s lighting and decoration. */
+    background: linear-gradient(100deg, #131b24, #0b1119);
+    /* Draw the top divider or highlight. */
+    border-top: 1px solid #35424f;
+}
+
+/* Style .instructions; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.instructions {
+    /* Set the space inside the element, between its content and its edges. */
+    padding: 12px 15px;
+    /* Draw the outline around the element using the given thickness, style, and color. */
+    border: 1px solid #3f9dcd;
+    /* Draw an extra ring outside the border without changing the layout size. */
+    outline: 3px solid #090e15;
+    /* Round the corners; 50% gives the button and power light their oval or circular shape. */
+    border-radius: 5px;
+    /* Center the text inside this element. */
+    text-align: center;
+}
+
+/* Style .instructions h2; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.instructions h2 {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0 0 8px;
+    /* Set the foreground text color. */
+    color: #f7c46a;
+    /* Set the size of the text. */
+    font-size: 9px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 3px;
+}
+
+/* Style .instructions p; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.instructions p {
+    /* Set the outside spacing; auto centers the cabinet horizontally where used. */
+    margin: 0;
+    /* Set the foreground text color. */
+    color: #aabcc8;
+    /* Set the size of the text. */
+    font-size: 10px;
+    /* Set line spacing as a multiple of the text size. */
+    line-height: 1.8;
+}
+
+/* Style .machine-id; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.machine-id {
+    /* Choose the layout mode: block, inline-block, flex, or grid. */
+    display: flex;
+    /* Distribute or center items along the layout’s main axis. */
+    justify-content: space-between;
+    /* Add outside spacing above the element. */
+    margin-top: 17px;
+    /* Set the size of the text. */
+    font-size: 8px;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 2px;
+    /* Set the foreground text color. */
+    color: #687f91;
+}
+
+/* Style .machine-id span:last-child; class selectors target matching HTML classes and pseudo-elements add decoration. */
+.machine-id span:last-child {
+    /* Set the foreground text color. */
+    color: #c4a66c;
+}
+
+/* Style footer; class selectors target matching HTML classes and pseudo-elements add decoration. */
+footer {
+    /* Add outside spacing above the element. */
+    margin-top: 24px;
+    /* Set the size of the text. */
+    font-size: 9px;
+    /* Set line spacing as a multiple of the text size. */
+    line-height: 1.8;
+    /* Set the extra space between characters for the arcade lettering. */
+    letter-spacing: 1.5px;
+}
+
+/* Apply these overrides only when the viewport is 480 pixels wide or narrower. */
+@media (max-width: 480px) {
+
+    /* Style the page around the cabinet. */
+    body {
+        /* Set the space inside the element, between its content and its edges. */
+        padding: 20px 12px;
+    }
+
+    /* Style .room-label; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .room-label {
+        /* Set the size of the text. */
+        font-size: 8px;
+        /* Set the extra space between characters for the arcade lettering. */
+        letter-spacing: 2px;
+    }
+
+    /* Build the arcade cabinet’s outer shell. */
+    .cabinet {
+        /* Set the space inside the element, between its content and its edges. */
+        padding: 9px 10px 0;
+    }
+
+    /* Style .screen-housing; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .screen-housing {
+        /* Set the space inside the element, between its content and its edges. */
+        padding: 13px 15px 12px;
+    }
+
+    /* Frame the playable canvas with a recessed bezel. */
+    .screen {
+        /* Reduce the screen border thickness on narrow displays. */
+        border-width: 6px;
+    }
+
+    /* Arrange the keyboard guide and restart button on the control panel. */
+    .control-deck {
+        /* Set the space inside the element, between its content and its edges. */
+        padding: 18px 8px;
+        /* Set the space between flex or grid items. */
+        gap: 8px;
+    }
+
+    /* Style .deck-mark; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .deck-mark {
+        /* Set the size of the text. */
+        font-size: 8px;
+        /* Set the extra space between characters for the arcade lettering. */
+        letter-spacing: 1px;
+    }
+
+    /* Style .lower-panel; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .lower-panel {
+        /* Set the space inside the element, between its content and its edges. */
+        padding: 18px 12px;
+    }
+
+    /* Style .marquee .edition; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .marquee .edition {
+        /* Set the extra space between characters for the arcade lettering. */
+        letter-spacing: 2px;
+    }
+
+    /* Style .machine-id; class selectors target matching HTML classes and pseudo-elements add decoration. */
+    .machine-id {
+        /* Set the extra space between characters for the arcade lettering. */
+        letter-spacing: 1px;
+    }
+}
+
+/* Respect the operating system’s preference for reduced animation. */
+@media (prefers-reduced-motion: reduce) {
+
+    /* Style the existing restart control as a red arcade button. */
+    button {
+        /* Animate button feedback briefly, or disable that animation for reduced-motion preferences. */
+        transition: none;
+    }
+}
